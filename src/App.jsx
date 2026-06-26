@@ -213,7 +213,7 @@ Respond with ONLY valid JSON, no markdown, no code fences, exactly this shape:
     const user = `Brand: ${brand.trim()}${desc.trim() ? `\nWhat they do / extra context: ${desc.trim()}` : ""}`;
 
     try {
-      const GEMINI_KEY = "AQ.Ab8RN6KxKRJ3DGgNklyG2Fxlt91mCpB-B9UyHBVFIarMtzzu4w";
+      const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY;
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
         {
