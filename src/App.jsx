@@ -198,7 +198,7 @@ After the roast, give ONE genuinely sharp, specific, useful strategic fix that p
 
 Roast the brand the user names. Use what you know; if it's obscure, infer cleverly from the name and description. Never refuse, never hedge, never claim you lack information.
 
-Respond with ONLY valid JSON, no markdown, no code fences, exactly this shape:
+You MUST respond with ONLY a raw JSON object. No markdown. No backticks. No explanation text before or after. Just the JSON object starting with { and ending with }. Shape:
 {
   "grade": "<a letter grade like C-, D+, B, F>",
   "verdict": "<one savage, quotable one-liner, max 14 words>",
@@ -215,7 +215,8 @@ Respond with ONLY valid JSON, no markdown, no code fences, exactly this shape:
     try {
       const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY;
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+        {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -226,8 +227,13 @@ Respond with ONLY valid JSON, no markdown, no code fences, exactly this shape:
       );
       const data = await res.json();
       const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      const text = raw.replace(/```json|```/g, "").trim();
-      setResult(JSON.parse(text));
+      if (!raw) throw new Error("Empty response");
+      const text = raw.replace(/```json[\s\S]*?```/g, m => m.slice(7,-3))
+                      .replace(/```/g, "")
+                      .trim();
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("No JSON found");
+      setResult(JSON.parse(jsonMatch[0]));
     } catch (e) {
       setError("Couldn't file the review — the server choked harder than your brand's Q3 numbers. Try again in a sec.");
     } finally {
@@ -460,7 +466,7 @@ Respond with ONLY valid JSON, no markdown, no code fences, exactly this shape:
           </div>
         )}
 
-        <div className="rmb-foot">Built by Aarshi · AI brand strategy with zero chill</div>
+        <div className="rmb-foot">Built by Aarshi Wahi · AI brand strategy with zero chill</div>
       </div>
     </div>
   );
