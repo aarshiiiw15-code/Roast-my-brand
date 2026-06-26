@@ -226,8 +226,9 @@ You MUST respond with ONLY a raw JSON object. No markdown. No backticks. No expl
         }
       );
       const data = await res.json();
-      const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      if (!raw) throw new Error("Empty response");
+      const raw = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join("") || data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+    if (!raw) throw new Error("Empty response");
       const text = raw.replace(/```json[\s\S]*?```/g, m => m.slice(7,-3))
                       .replace(/```/g, "")
                       .trim();
